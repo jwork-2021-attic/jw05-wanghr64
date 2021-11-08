@@ -55,9 +55,9 @@ public class PlayScreen implements Screen {
 
     private void createBonusus() {
         for (int i = 0; i < 10; ++i) {
-            world.addBonusAtEmptyLocation(new world.Bonus(0));
-            world.addBonusAtEmptyLocation(new world.Bonus(1));
-            world.addBonusAtEmptyLocation(new world.Bonus(2));
+            world.addBonusAtEmptyLocation(new world.Bonus(world, 0));
+            world.addBonusAtEmptyLocation(new world.Bonus(world, 1));
+            world.addBonusAtEmptyLocation(new world.Bonus(world, 2));
         }
     }
 

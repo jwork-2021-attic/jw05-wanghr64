@@ -2,7 +2,8 @@ package world;
 
 public class Bonus {
 
-    public Bonus(int type) {
+    public Bonus(World world, int type) {
+        this.world = world;
         this.type = type;
     }
 
