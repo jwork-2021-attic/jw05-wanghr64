@@ -21,8 +21,7 @@ import world.*;
 import asciiPanel.AsciiPanel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -36,6 +35,9 @@ public class PlayScreen implements Screen {
     private int screenHeight;
     private List<String> messages;
     private List<String> oldMessages;
+    private PlayerAI[] myAIs;
+    private boolean[] validAIs;
+    private int iCurAI;
 
     public PlayScreen() {
         this.screenWidth = 80;
@@ -44,13 +46,25 @@ public class PlayScreen implements Screen {
         this.messages = new ArrayList<String>();
         this.oldMessages = new ArrayList<String>();
 
-        CreatureFactory creatureFactory = new CreatureFactory(this.world);
-        createCreatures(creatureFactory);
+        createCreatures();
         createBonusus();
     }
 
-    private void createCreatures(CreatureFactory creatureFactory) {
-        this.player = creatureFactory.newPlayer(this.messages);
+    private void createCreatures() {
+        player = new Creature(this.world, (char) 2, AsciiPanel.brightWhite, 100, 20, 5, 9);
+        world.addAtEmptyLocation(player);
+        myAIs = new PlayerAI[7];
+        myAIs[0] = new OldManAI(player, messages);
+        myAIs[1] = new PowerBrotherAI(player, messages);
+        myAIs[2] = new ViewBrotherAI(player, messages);
+        myAIs[3] = new FireBrotherAI(player, messages);
+        myAIs[4] = new WaterBrotherAI(player, messages);
+        myAIs[5] = new SteelBrotherAI(player, messages);
+        myAIs[6] = new HideBrotherAI(player, messages);
+        iCurAI = 0;
+        player.setAI(myAIs[iCurAI]);
+        validAIs = new boolean[7];
+        Arrays.fill(validAIs, true);
     }
 
     private void createBonusus() {
@@ -123,6 +137,15 @@ public class PlayScreen implements Screen {
         terminal.write(stats, 1, 42);
         // Messages
         displayMessages(terminal, this.messages);
+
+        // Show characters
+        terminal.write("OldMan", 2, 44, iCurAI == 0 ? Color.LIGHT_GRAY : Color.DARK_GRAY);
+        terminal.write("PowerBro", 10, 44, iCurAI == 1 ? Color.ORANGE : Color.DARK_GRAY);
+        terminal.write("ViewBro", 20, 44, iCurAI == 2 ? Color.YELLOW : Color.DARK_GRAY);
+        terminal.write("FireBro", 29, 44, iCurAI == 3 ? Color.RED : Color.DARK_GRAY);
+        terminal.write("WaterBro", 38, 44, iCurAI == 4 ? Color.BLUE : Color.DARK_GRAY);
+        terminal.write("SteelBro", 48, 44, iCurAI == 5 ? Color.GREEN : Color.DARK_GRAY);
+        terminal.write("HideBro", 58, 44, iCurAI == 6 ? Color.CYAN : Color.DARK_GRAY);
     }
 
     @Override
@@ -139,6 +162,12 @@ public class PlayScreen implements Screen {
             break;
         case KeyEvent.VK_DOWN:
             player.moveBy(0, 1);
+            break;
+        case KeyEvent.VK_V:
+            iCurAI = (iCurAI + 1) % 7;
+            while (!validAIs[iCurAI])
+                iCurAI = (iCurAI + 1) % 7;
+            player.setAI(myAIs[iCurAI]);
             break;
         }
         return this;
