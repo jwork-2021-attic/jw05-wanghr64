@@ -19,8 +19,6 @@ package world;
 
 import java.awt.Color;
 
-import javax.swing.plaf.basic.BasicOptionPaneUI.ButtonActionListener;
-
 /**
  *
  * @author Aeranythe Echosong
@@ -124,6 +122,7 @@ public class Creature {
         if (this.ai.getClass() == PlayerAI.class && bonus != null) {
             ((PlayerAI) this.ai).getBonus(bonus);
             this.notify("I get a bonus " + bonus.type() + ", LUCKY!");
+            bonus.remove();
         }
         if (other == null) {
             ai.onEnter(x + mx, y + my, world.tile(x + mx, y + my));
