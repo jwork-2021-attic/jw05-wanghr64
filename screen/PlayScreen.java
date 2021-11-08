@@ -24,7 +24,6 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  *
  * @author Aeranythe Echosong
@@ -37,30 +36,33 @@ public class PlayScreen implements Screen {
     private int screenHeight;
     private List<String> messages;
     private List<String> oldMessages;
-    private List<int[]> route;
-    private boolean cheatMode;
 
     public PlayScreen() {
         this.screenWidth = 80;
-        this.screenHeight = 24;
+        this.screenHeight = 40;
         createWorld();
         this.messages = new ArrayList<String>();
         this.oldMessages = new ArrayList<String>();
 
         CreatureFactory creatureFactory = new CreatureFactory(this.world);
         createCreatures(creatureFactory);
+        createBonusus();
     }
 
     private void createCreatures(CreatureFactory creatureFactory) {
-        this.player = creatureFactory.newPlayer(this.messages, 0, 1);
+        this.player = creatureFactory.newPlayer(this.messages);
+    }
 
-        /*
-         * for (int i = 0; i < 8; i++) { creatureFactory.newFungus(); }
-         */
+    private void createBonusus() {
+        for (int i = 0; i < 10; ++i) {
+            world.addBonusAtEmptyLocation(new world.Bonus(0));
+            world.addBonusAtEmptyLocation(new world.Bonus(1));
+            world.addBonusAtEmptyLocation(new world.Bonus(2));
+        }
     }
 
     private void createWorld() {
-        world = new WorldBuilder(90, 31).makeMaze().build();
+        world = new WorldBuilder(90, 60).makeCaves().build();
     }
 
     private void displayTiles(AsciiPanel terminal, int left, int top) {
@@ -87,30 +89,18 @@ public class PlayScreen implements Screen {
             }
         }
 
-        // Show Route
-        if (cheatMode)
-            for (int i = 0; i < route.size(); ++i) {
-                int xx = route.get(i)[0];
-                int yy = route.get(i)[1];
-                int dx = (i == 0) ? xx - 0 : xx - route.get(i - 1)[0];
-                int dy = (i == 0) ? yy - 0 : yy - route.get(i - 1)[1];
-                char arrow = 0;
-                if (dx == 1 && dy == 0)
-                    arrow = 26;
-                else if (dx == -1 && dy == 0)
-                    arrow = 27;
-                else if (dx == 0 && dy == 1)
-                    arrow = 25;
-                else
-                    arrow = 24;
-                if (xx >= left && xx < left + screenWidth && yy >= top && yy < top + screenHeight)
-                    terminal.write(arrow, xx - left, yy - top, Color.PINK);
-
+        // Show bonuses
+        for (Bonus bonus : world.getBonuses()) {
+            if (bonus.x() >= left && bonus.x() < left + screenWidth && bonus.y() >= top
+                    && bonus.y() < top + screenHeight) {
+                if (player.canSee(bonus.x(), bonus.y())) {
+                    terminal.write(bonus.glyph(), bonus.x() - left, bonus.y() - top, Color.BLUE);
+                }
             }
+        }
 
         // Creatures can choose their next action now
         world.update();
-
     }
 
     private void displayMessages(AsciiPanel terminal, List<String> messages) {
@@ -128,10 +118,9 @@ public class PlayScreen implements Screen {
         displayTiles(terminal, getScrollX(), getScrollY());
         // Player
         terminal.write(player.glyph(), player.x() - getScrollX(), player.y() - getScrollY(), player.color());
-        String hint = "Press 'C' to cheat.";
-        terminal.write(hint, 1, 27, Color.DARK_GRAY);
-        if (cheatMode)
-            terminal.write("CHEAT MODE ON!!!!", 23, 27, Color.RED);
+        // Stats
+        String stats = String.format("%3d/%3d hp", player.hp(), player.maxHP());
+        terminal.write(stats, 1, 42);
         // Messages
         displayMessages(terminal, this.messages);
     }
@@ -139,33 +128,18 @@ public class PlayScreen implements Screen {
     @Override
     public Screen respondToUserInput(KeyEvent key) {
         switch (key.getKeyCode()) {
-            case KeyEvent.VK_LEFT:
-                player.moveBy(-1, 0);
-                if (cheatMode)
-                    route = new MazeRouter(world, player.x(), player.y(), 89, 29).getRoute();
-                break;
-            case KeyEvent.VK_RIGHT:
-                if (player.x() == this.world.width() - 1 && player.y() == this.world.height() - 2)
-                    return new WinScreen();
-                player.moveBy(1, 0);
-                if (cheatMode)
-                    route = new MazeRouter(world, player.x(), player.y(), 89, 29).getRoute();
-                break;
-            case KeyEvent.VK_UP:
-                player.moveBy(0, -1);
-                if (cheatMode)
-                    route = new MazeRouter(world, player.x(), player.y(), 89, 29).getRoute();
-                break;
-            case KeyEvent.VK_DOWN:
-                player.moveBy(0, 1);
-                if (cheatMode)
-                    route = new MazeRouter(world, player.x(), player.y(), 89, 29).getRoute();
-                break;
-            case KeyEvent.VK_C:
-                this.cheatMode = !this.cheatMode;
-                if (cheatMode)
-                    route = new MazeRouter(world, player.x(), player.y(), 89, 29).getRoute();
-                break;
+        case KeyEvent.VK_LEFT:
+            player.moveBy(-1, 0);
+            break;
+        case KeyEvent.VK_RIGHT:
+            player.moveBy(1, 0);
+            break;
+        case KeyEvent.VK_UP:
+            player.moveBy(0, -1);
+            break;
+        case KeyEvent.VK_DOWN:
+            player.moveBy(0, 1);
+            break;
         }
         return this;
     }
