@@ -27,7 +27,7 @@ public abstract class PlayerAI extends CreatureAI {
 
     private List<String> messages;
 
-    private int digCount = 0;
+    private Player player = (Player) creature;
 
     public PlayerAI(Creature creature, List<String> messages) {
         super(creature);
@@ -38,8 +38,9 @@ public abstract class PlayerAI extends CreatureAI {
         if (tile.isGround()) {
             creature.setX(x);
             creature.setY(y);
-        } else if (tile.isDiggable() && digCount > 0) {
+        } else if (tile.isDiggable() && player.digCount > 0) {
             creature.dig(x, y);
+            --player.digCount;
         }
     }
 
@@ -48,6 +49,12 @@ public abstract class PlayerAI extends CreatureAI {
     }
 
     public void getBonus(Bonus bonus) {
+        switch (bonus.type()) {
+        case 0:// dig
+            player.digCount += 10;
+        default:
+            break;
+        }
     }
 
     public abstract void action();
