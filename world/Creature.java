@@ -119,7 +119,7 @@ public class Creature {
         Creature other = world.creature(x + mx, y + my);
         Bonus bonus = world.bonus(x + mx, y + my);
 
-        if (this.ai.getClass() == PlayerAI.class && bonus != null) {
+        if (PlayerAI.class.isAssignableFrom(this.ai.getClass()) && bonus != null) {
             ((PlayerAI) this.ai).getBonus(bonus);
             this.notify("I get a bonus " + bonus.type() + ", LUCKY!");
             bonus.remove();

@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @author Aeranythe Echosong
  */
-public class PlayerAI extends CreatureAI {
+public abstract class PlayerAI extends CreatureAI {
 
     private List<String> messages;
 
@@ -49,4 +49,7 @@ public class PlayerAI extends CreatureAI {
 
     public void getBonus(Bonus bonus) {
     }
+
+    public abstract void action();
+
 }
