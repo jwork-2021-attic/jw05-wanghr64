@@ -7,5 +7,5 @@ public class Player extends Creature {
         super(world, glyph, color, maxHP, attack, defense, visionRadius);
     }
 
-    int digCount = 0;
+    public int digCount = 0;
 }
