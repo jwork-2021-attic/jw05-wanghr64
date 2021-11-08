@@ -37,7 +37,7 @@ public class ApplicationMain extends JFrame implements KeyListener {
 
     public ApplicationMain() {
         super();
-        terminal = new AsciiPanel(80, 45, AsciiFont.TALRYTH_15_15);
+        terminal = new AsciiPanel(80, 50, AsciiFont.TALRYTH_15_15);
         add(terminal);
         pack();
         screen = new StartScreen();
