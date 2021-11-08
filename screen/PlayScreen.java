@@ -30,7 +30,7 @@ import java.util.*;
 public class PlayScreen implements Screen {
 
     private World world;
-    private Creature player;
+    private Player player;
     private int screenWidth;
     private int screenHeight;
     private List<String> messages;
@@ -51,7 +51,7 @@ public class PlayScreen implements Screen {
     }
 
     private void createCreatures() {
-        player = new Creature(this.world, (char) 2, AsciiPanel.brightWhite, 100, 20, 5, 9);
+        player = new Player(this.world, (char) 2, AsciiPanel.brightWhite, 100, 20, 5, 9);
         world.addAtEmptyLocation(player);
         myAIs = new PlayerAI[7];
         myAIs[0] = new OldManAI(player, messages);
@@ -133,7 +133,7 @@ public class PlayScreen implements Screen {
         // Player
         terminal.write(player.glyph(), player.x() - getScrollX(), player.y() - getScrollY(), player.color());
         // Stats
-        String stats = String.format("%3d/%3d hp", player.hp(), player.maxHP());
+        String stats = String.format("%3d/%3d hp   %2d digs", player.hp(), player.maxHP(), player.digCount);
         terminal.write(stats, 1, 42);
         // Messages
         displayMessages(terminal, this.messages);
