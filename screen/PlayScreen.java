@@ -38,6 +38,7 @@ public class PlayScreen implements Screen {
     private PlayerAI[] myAIs;
     private boolean[] validAIs;
     private int iCurAI;
+    private int preDirect;
 
     public PlayScreen() {
         this.screenWidth = 80;
@@ -117,6 +118,57 @@ public class PlayScreen implements Screen {
         world.update();
     }
 
+    private void displaySkill(AsciiPanel terminal) {
+        switch (iCurAI) {
+        case 1:
+            switch (preDirect) {
+            case KeyEvent.VK_LEFT:
+                terminal.write("*", player.x() - getScrollX() - 1, player.y() - getScrollY(), Color.RED);
+                break;
+            case KeyEvent.VK_RIGHT:
+                terminal.write("*", player.x() - getScrollX() + 1, player.y() - getScrollY(), Color.RED);
+                break;
+            case KeyEvent.VK_UP:
+                terminal.write("*", player.x() - getScrollX(), player.y() - getScrollY() - 1, Color.RED);
+                break;
+            case KeyEvent.VK_DOWN:
+                terminal.write("*", player.x() - getScrollX(), player.y() - getScrollY() + 1, Color.RED);
+                break;
+            }
+            break;
+        case 2:
+            break;
+        case 3:
+            switch (preDirect) {
+            case KeyEvent.VK_LEFT:
+                for (int i = 1; i < 6 && player.x() - getScrollX() - i >= 0; ++i)
+                    terminal.write("*", player.x() - getScrollX() - i, player.y() - getScrollY(), Color.RED);
+                break;
+            case KeyEvent.VK_RIGHT:
+                for (int i = 1; i < 6 && player.x() - getScrollX() + i < screenWidth; ++i)
+                    terminal.write("*", player.x() - getScrollX() + i, player.y() - getScrollY(), Color.RED);
+                break;
+            case KeyEvent.VK_UP:
+                for (int i = 1; i < 6 && player.y() - getScrollY() - i >= 0; ++i)
+                    terminal.write("*", player.x() - getScrollX(), player.y() - getScrollY() - i, Color.RED);
+                break;
+            case KeyEvent.VK_DOWN:
+                for (int i = 1; i < 6 && player.y() - getScrollY() + i < screenHeight; ++i)
+                    terminal.write("*", player.x() - getScrollX(), player.y() - getScrollY() + i, Color.RED);
+                break;
+            }
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        case 6:
+            break;
+        default:
+            break;
+        }
+    }
+
     private void displayMessages(AsciiPanel terminal, List<String> messages) {
         int top = this.screenHeight - messages.size();
         for (int i = 0; i < messages.size(); i++) {
@@ -138,38 +190,52 @@ public class PlayScreen implements Screen {
         // Messages
         displayMessages(terminal, this.messages);
 
+        if (player.onSkill())
+            displaySkill(terminal);
+
         // Show characters
-        terminal.write("OldMan", 2, 44, iCurAI == 0 ? Color.LIGHT_GRAY : Color.DARK_GRAY);
-        terminal.write("PowerBro", 10, 44, iCurAI == 1 ? Color.ORANGE : Color.DARK_GRAY);
-        terminal.write("ViewBro", 20, 44, iCurAI == 2 ? Color.YELLOW : Color.DARK_GRAY);
-        terminal.write("FireBro", 29, 44, iCurAI == 3 ? Color.RED : Color.DARK_GRAY);
-        terminal.write("WaterBro", 38, 44, iCurAI == 4 ? Color.BLUE : Color.DARK_GRAY);
-        terminal.write("SteelBro", 48, 44, iCurAI == 5 ? Color.GREEN : Color.DARK_GRAY);
-        terminal.write("HideBro", 58, 44, iCurAI == 6 ? Color.CYAN : Color.DARK_GRAY);
+        terminal.write("OldMan", 2, 44, iCurAI == 0 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("PowerBro", 10, 44, iCurAI == 1 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("ViewBro", 20, 44, iCurAI == 2 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("FireBro", 29, 44, iCurAI == 3 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("WaterBro", 38, 44, iCurAI == 4 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("SteelBro", 48, 44, iCurAI == 5 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("HideBro", 58, 44, iCurAI == 6 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
     }
 
     @Override
     public Screen respondToUserInput(KeyEvent key) {
+        if (player.onSkill())
+            return this;
         switch (key.getKeyCode()) {
         case KeyEvent.VK_LEFT:
             player.moveBy(-1, 0);
+            preDirect = KeyEvent.VK_LEFT;
             break;
         case KeyEvent.VK_RIGHT:
             player.moveBy(1, 0);
+            preDirect = KeyEvent.VK_RIGHT;
             break;
         case KeyEvent.VK_UP:
             player.moveBy(0, -1);
+            preDirect = KeyEvent.VK_UP;
             break;
         case KeyEvent.VK_DOWN:
             player.moveBy(0, 1);
+            preDirect = KeyEvent.VK_DOWN;
             break;
         case KeyEvent.VK_V:
             iCurAI = (iCurAI + 1) % 7;
             while (!validAIs[iCurAI])
                 iCurAI = (iCurAI + 1) % 7;
             player.setAI(myAIs[iCurAI]);
+            player.setColor(Player.id2Color(iCurAI));
+            break;
+        case KeyEvent.VK_C:
+            player.skill();
             break;
         }
+
         return this;
     }
 
@@ -180,5 +246,4 @@ public class PlayScreen implements Screen {
     public int getScrollY() {
         return Math.max(0, Math.min(player.y() - screenHeight / 2, world.height() - screenHeight));
     }
-
 }
