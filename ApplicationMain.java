@@ -82,7 +82,7 @@ public class ApplicationMain extends JFrame implements KeyListener {
             while (true) {
                 app.repaint();
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(33);
                 } catch (Exception e) {
                 }
             }
