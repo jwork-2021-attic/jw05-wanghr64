@@ -58,7 +58,6 @@ public class ApplicationMain extends JFrame implements KeyListener {
      */
     public void keyPressed(KeyEvent e) {
         screen = screen.respondToUserInput(e);
-        repaint();
     }
 
     /**
@@ -79,6 +78,15 @@ public class ApplicationMain extends JFrame implements KeyListener {
         ApplicationMain app = new ApplicationMain();
         app.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         app.setVisible(true);
+        new Thread(() -> {
+            while (true) {
+                app.repaint();
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                }
+            }
+        }).start();
     }
 
 }
