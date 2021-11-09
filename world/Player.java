@@ -9,6 +9,10 @@ public class Player extends Creature {
 
     public int digCount = 0;
 
+    public boolean onSkill() {
+        return ai.onSkill();
+    }
+
     public static Color id2Color(int id) {
         switch (id) {
         case 0:
@@ -31,6 +35,6 @@ public class Player extends Creature {
     }
 
     public void skill() {
-        ((PlayerAI) ai).skill();
+        new Thread(ai).start();
     }
 }

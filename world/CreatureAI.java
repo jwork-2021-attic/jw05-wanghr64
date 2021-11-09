@@ -23,13 +23,19 @@ import java.awt.Point;
  *
  * @author Aeranythe Echosong
  */
-class CreatureAI {
+class CreatureAI implements Runnable {
 
     protected Creature creature;
 
     public CreatureAI(Creature creature) {
         this.creature = creature;
         this.creature.setAI(this);
+    }
+
+    protected boolean onSkill;
+
+    public boolean onSkill() {
+        return this.onSkill;
     }
 
     public void onEnter(int x, int y, Tile tile) {
@@ -53,5 +59,9 @@ class CreatureAI {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void run() {
     }
 }
