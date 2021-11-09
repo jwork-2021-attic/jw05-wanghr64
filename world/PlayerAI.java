@@ -17,17 +17,20 @@
  */
 package world;
 
+import java.awt.Point;
 import java.util.List;
 
 /**
  *
  * @author Aeranythe Echosong
  */
-public abstract class PlayerAI extends CreatureAI {
+public class PlayerAI extends CreatureAI {
 
     private List<String> messages;
 
-    private Player player = (Player) creature;
+    protected Player player = (Player) creature;
+
+    protected boolean allSee;
 
     public PlayerAI(Creature creature, List<String> messages) {
         super(creature);
@@ -57,6 +60,21 @@ public abstract class PlayerAI extends CreatureAI {
         }
     }
 
-    public abstract void skill();
+    @Override
+    public boolean canSee(int x, int y) {
+        if (allSee)
+            return true;
+        if ((creature.x() - x) * (creature.x() - x) + (creature.y() - y) * (creature.y() - y) > creature.visionRadius()
+                * creature.visionRadius()) {
+            return false;
+        }
+        for (Point p : new Line(player.x(), player.y(), x, y)) {
+            if (creature.tile(p.x, p.y).isGround() || (p.x == x && p.y == y)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
 
 }
