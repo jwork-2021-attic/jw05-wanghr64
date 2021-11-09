@@ -9,7 +9,12 @@ public class ViewBrotherAI extends PlayerAI {
     }
 
     @Override
-    public void skill() {
-
+    public void run() {
+        allSee = true;
+        try {
+            Thread.sleep(2000);
+        } catch (Exception e) {
+        }
+        allSee = false;
     }
 }

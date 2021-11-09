@@ -9,7 +9,13 @@ public class PowerBrotherAI extends PlayerAI {
     }
 
     @Override
-    public void skill() {
-
+    public void run() {
+        onSkill = true;
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        onSkill = false;
     }
 }

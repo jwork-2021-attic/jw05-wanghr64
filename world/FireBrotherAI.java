@@ -9,7 +9,12 @@ public class FireBrotherAI extends PlayerAI {
     }
 
     @Override
-    public void skill() {
-
+    public void run() {
+        onSkill = true;
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+        onSkill = false;
     }
 }
