@@ -9,7 +9,7 @@ public class OldManAI extends PlayerAI {
     }
 
     @Override
-    public void action() {
+    public void skill() {
 
     }
 }

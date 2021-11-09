@@ -57,6 +57,6 @@ public abstract class PlayerAI extends CreatureAI {
         }
     }
 
-    public abstract void action();
+    public abstract void skill();
 
 }
