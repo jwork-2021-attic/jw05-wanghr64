@@ -29,4 +29,8 @@ public class Player extends Creature {
             return Color.LIGHT_GRAY;
         }
     }
+
+    public void skill() {
+        ((PlayerAI) ai).skill();
+    }
 }

@@ -53,13 +53,21 @@ public class Creature {
         return this.glyph;
     }
 
+    public void setGlyph(char glyph) {
+        this.glyph = glyph;
+    }
+
     private Color color;
 
     public Color color() {
         return this.color;
     }
 
-    private CreatureAI ai;
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    protected CreatureAI ai;
 
     public void setAI(CreatureAI ai) {
         this.ai = ai;

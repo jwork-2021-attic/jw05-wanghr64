@@ -9,7 +9,7 @@ public class SteelBrotherAI extends PlayerAI {
     }
 
     @Override
-    public void action() {
+    public void skill() {
 
     }
 }
