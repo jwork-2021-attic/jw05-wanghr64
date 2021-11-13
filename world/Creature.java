@@ -134,9 +134,9 @@ public class Creature {
         }
         if (other == null) {
             ai.onEnter(x + mx, y + my, world.tile(x + mx, y + my));
-        } else {
-            attack(other);
-        }
+        } /*
+           * else { attack(other); }
+           */
     }
 
     public void attack(Creature other) {
