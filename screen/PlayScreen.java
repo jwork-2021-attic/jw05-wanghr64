@@ -55,17 +55,23 @@ public class PlayScreen implements Screen {
         player = new Player(this.world, (char) 2, AsciiPanel.brightWhite, 100, 20, 5, 9);
         world.addAtEmptyLocation(player);
         myAIs = new PlayerAI[7];
-        myAIs[0] = new OldManAI(player, messages);
-        myAIs[1] = new PowerBrotherAI(player, messages);
-        myAIs[2] = new ViewBrotherAI(player, messages);
-        myAIs[3] = new FireBrotherAI(player, messages);
-        myAIs[4] = new WaterBrotherAI(player, messages);
-        myAIs[5] = new SteelBrotherAI(player, messages);
-        myAIs[6] = new HideBrotherAI(player, messages);
+        myAIs[0] = new OldManAI(player, world, messages);
+        myAIs[1] = new PowerBrotherAI(player, world, messages);
+        myAIs[2] = new ViewBrotherAI(player, world, messages);
+        myAIs[3] = new FireBrotherAI(player, world, messages);
+        myAIs[4] = new WaterBrotherAI(player, world, messages);
+        myAIs[5] = new SteelBrotherAI(player, world, messages);
+        myAIs[6] = new HideBrotherAI(player, world, messages);
         iCurAI = 0;
         player.setAI(myAIs[iCurAI]);
         validAIs = new boolean[7];
         Arrays.fill(validAIs, true);
+
+        for (int i = 0; i < 20; ++i) {
+            Creature enemy = new Creature(this.world, (char) 15, Color.PINK, 100, 20, 5, 9);
+            new Thread(new EnemyAI(enemy, world, player)).start();
+            world.addAtEmptyLocation(enemy);
+        }
     }
 
     private void createBonusus() {
@@ -141,24 +147,65 @@ public class PlayScreen implements Screen {
         case 3:
             switch (preDirect) {
             case KeyEvent.VK_LEFT:
-                for (int i = 1; i < 6 && player.x() - getScrollX() - i >= 0; ++i)
+                for (int i = 1; i < 6 && player.x() - getScrollX() - i >= 0
+                        && world.tile(player.x() - i, player.y()) != Tile.WALL; ++i)
                     terminal.write("*", player.x() - getScrollX() - i, player.y() - getScrollY(), Color.RED);
                 break;
             case KeyEvent.VK_RIGHT:
-                for (int i = 1; i < 6 && player.x() - getScrollX() + i < screenWidth; ++i)
+                for (int i = 1; i < 6 && player.x() - getScrollX() + i < screenWidth
+                        && world.tile(player.x() + i, player.y()) != Tile.WALL; ++i)
                     terminal.write("*", player.x() - getScrollX() + i, player.y() - getScrollY(), Color.RED);
                 break;
             case KeyEvent.VK_UP:
-                for (int i = 1; i < 6 && player.y() - getScrollY() - i >= 0; ++i)
+                for (int i = 1; i < 6 && player.y() - getScrollY() - i >= 0
+                        && world.tile(player.x(), player.y() - i) != Tile.WALL; ++i)
                     terminal.write("*", player.x() - getScrollX(), player.y() - getScrollY() - i, Color.RED);
                 break;
             case KeyEvent.VK_DOWN:
-                for (int i = 1; i < 6 && player.y() - getScrollY() + i < screenHeight; ++i)
+                for (int i = 1; i < 6 && player.y() - getScrollY() + i < screenHeight
+                        && world.tile(player.x(), player.y() + i) != Tile.WALL; ++i)
                     terminal.write("*", player.x() - getScrollX(), player.y() - getScrollY() + i, Color.RED);
                 break;
             }
             break;
         case 4:
+            int r = 5;
+            int xx = player.x() - getScrollX();
+            int yy = player.y() - getScrollY();
+            int wxx = player.x();
+            int wyy = player.y();
+            for (int i = 0; i < r; ++i) {
+                int rr = r - i;
+                for (int j = 0; j < rr; ++j) {
+                    if (i == 0 && j == 0)
+                        continue;
+                    try {
+                        if (xx + j < screenWidth && xx + j >= 0 && yy + i < screenHeight && yy + i >= 0
+                                && world.tile(wxx + j, wyy + i) != Tile.WALL)
+                            terminal.write('*', xx + j, yy + i, Color.BLUE);
+                    } catch (Exception e) {
+                    }
+                    try {
+                        if (xx + j < screenWidth && xx + j >= 0 && yy - i < screenHeight && yy - i >= 0
+                                && world.tile(wxx + j, wyy - i) != Tile.WALL)
+                            terminal.write('*', xx + j, yy - i, Color.BLUE);
+                    } catch (Exception e) {
+                    }
+                    try {
+                        if (xx - j < screenWidth && xx - j >= 0 && yy + i < screenHeight && yy + i >= 0
+                                && world.tile(wxx - j, wyy + i) != Tile.WALL)
+                            terminal.write('*', xx - j, yy + i, Color.BLUE);
+                    } catch (Exception e) {
+                    }
+                    try {
+                        if (xx - j < screenWidth && xx - j >= 0 && yy - i < screenHeight && yy - i >= 0
+                                && world.tile(wxx - j, wyy - i) != Tile.WALL)
+                            terminal.write('*', xx - j, yy - i, Color.BLUE);
+                    } catch (Exception e) {
+                    }
+
+                }
+            }
             break;
         case 5:
             break;
@@ -208,30 +255,37 @@ public class PlayScreen implements Screen {
         if (player.onSkill())
             return this;
         switch (key.getKeyCode()) {
-        case KeyEvent.VK_LEFT:
+        case KeyEvent.VK_A:
             player.moveBy(-1, 0);
             preDirect = KeyEvent.VK_LEFT;
             break;
-        case KeyEvent.VK_RIGHT:
+        case KeyEvent.VK_D:
             player.moveBy(1, 0);
             preDirect = KeyEvent.VK_RIGHT;
             break;
-        case KeyEvent.VK_UP:
+        case KeyEvent.VK_W:
             player.moveBy(0, -1);
             preDirect = KeyEvent.VK_UP;
             break;
-        case KeyEvent.VK_DOWN:
+        case KeyEvent.VK_S:
             player.moveBy(0, 1);
             preDirect = KeyEvent.VK_DOWN;
             break;
-        case KeyEvent.VK_V:
+        case KeyEvent.VK_Q:
+            iCurAI = iCurAI == 0 ? 6 : iCurAI - 1;
+            while (!validAIs[iCurAI])
+                iCurAI = iCurAI == 0 ? 6 : iCurAI - 1;
+            player.setAI(myAIs[iCurAI]);
+            player.setColor(Player.id2Color(iCurAI));
+            break;
+        case KeyEvent.VK_E:
             iCurAI = (iCurAI + 1) % 7;
             while (!validAIs[iCurAI])
                 iCurAI = (iCurAI + 1) % 7;
             player.setAI(myAIs[iCurAI]);
             player.setColor(Player.id2Color(iCurAI));
             break;
-        case KeyEvent.VK_C:
+        case KeyEvent.VK_J:
             player.skill();
             break;
         }
