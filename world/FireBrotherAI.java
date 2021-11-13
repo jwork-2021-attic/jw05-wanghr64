@@ -4,8 +4,8 @@ import java.util.*;
 
 public class FireBrotherAI extends PlayerAI {
 
-    public FireBrotherAI(Creature creature, List<String> messages) {
-        super(creature, messages);
+    public FireBrotherAI(Creature creature, World world, List<String> messages) {
+        super(creature, world, messages);
     }
 
     @Override

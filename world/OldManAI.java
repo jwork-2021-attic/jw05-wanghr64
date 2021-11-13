@@ -4,8 +4,8 @@ import java.util.*;
 
 public class OldManAI extends PlayerAI {
 
-    public OldManAI(Creature creature, List<String> messages) {
-        super(creature, messages);
+    public OldManAI(Creature creature, World world, List<String> messages) {
+        super(creature, world, messages);
     }
 
     @Override

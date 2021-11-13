@@ -23,12 +23,14 @@ import java.awt.Point;
  *
  * @author Aeranythe Echosong
  */
-class CreatureAI implements Runnable {
+abstract class CreatureAI implements Runnable {
 
     protected Creature creature;
+    protected World world;
 
-    public CreatureAI(Creature creature) {
+    public CreatureAI(Creature creature, World world) {
         this.creature = creature;
+        this.world = world;
         this.creature.setAI(this);
     }
 
@@ -59,9 +61,5 @@ class CreatureAI implements Runnable {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public void run() {
     }
 }
