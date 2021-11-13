@@ -23,6 +23,8 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.*;
 
+import javax.swing.JSpinner.DateEditor;
+
 /**
  *
  * @author Aeranythe Echosong
@@ -39,6 +41,7 @@ public class PlayScreen implements Screen {
     private boolean[] validAIs;
     private int iCurAI;
     private int preDirect;
+    private Date preMessageClearTime;
 
     public PlayScreen() {
         this.screenWidth = 80;
@@ -217,12 +220,17 @@ public class PlayScreen implements Screen {
     }
 
     private void displayMessages(AsciiPanel terminal, List<String> messages) {
+        if (preMessageClearTime == null)
+            preMessageClearTime = new Date();
         int top = this.screenHeight - messages.size();
         for (int i = 0; i < messages.size(); i++) {
             terminal.write(messages.get(i), 1, top + i + 1);
         }
         this.oldMessages.addAll(messages);
-        messages.clear();
+        if (new Date().getTime() - preMessageClearTime.getTime() > 1500) {
+            messages.clear();
+            preMessageClearTime = null;
+        }
     }
 
     @Override
