@@ -14,23 +14,17 @@ public class WaterBrotherAI extends PlayerAI {
         int r = 5;
         int x = player.x();
         int y = player.y();
-        Creature enemy = null;
         for (int i = 0; i < r; ++i)
             for (int j = 0; j < r - i; ++j) {
                 if (i == 0 && j == 0)
                     continue;
-                enemy = world.creature(x + j, y + i);
-                if (enemy != null)
-                    player.attack(enemy);
-                enemy = world.creature(x + j, y - i);
-                if (enemy != null)
-                    player.attack(enemy);
-                enemy = world.creature(x - j, y + i);
-                if (enemy != null)
-                    player.attack(enemy);
-                enemy = world.creature(x - j, y - i);
-                if (enemy != null)
-                    player.attack(enemy);
+                player.attack(world.creature(x + j, y + i));
+                if (i != 0)
+                    player.attack(world.creature(x + j, y - i));
+                if (j != 0)
+                    player.attack(world.creature(x - j, y + i));
+                if (i != 0 && j != 0)
+                    player.attack(world.creature(x - j, y - i));
             }
         try {
             Thread.sleep(1000);
