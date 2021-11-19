@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.*;
 
 /*
  * Copyright (C) 2015 Aeranythe Echosong
@@ -31,7 +32,7 @@ public class World {
     private Tile[][] tiles;
     private int width;
     private int height;
-    private List<Creature> creatures;
+    private ConcurrentLinkedDeque<Creature> creatures;
     private List<Bonus> bonuses;
 
     public static final int TILE_TYPES = 2;
@@ -40,7 +41,7 @@ public class World {
         this.tiles = tiles;
         this.width = tiles.length;
         this.height = tiles[0].length;
-        this.creatures = new LinkedList<>();
+        this.creatures = new ConcurrentLinkedDeque<>();
         this.bonuses = new LinkedList<>();
     }
 
@@ -126,7 +127,7 @@ public class World {
         return null;
     }
 
-    public List<Creature> getCreatures() {
+    public ConcurrentLinkedDeque<Creature> getCreatures() {
         return this.creatures;
     }
 
