@@ -36,6 +36,8 @@ public class PlayScreen implements Screen {
     private List<String> messages;
     private List<String> oldMessages;
     private PlayerAI[] myAIs;
+    private int[] curCoolTime;
+    private final int[] maxCoolTime;
     private boolean[] validAIs;
     private int iCurAI;
     private int preDirect;
@@ -48,8 +50,23 @@ public class PlayScreen implements Screen {
         this.messages = new ArrayList<String>();
         this.oldMessages = new ArrayList<String>();
 
+        maxCoolTime = new int[] { 0, 10, 10, 10, 10, 10, 10 };
+        curCoolTime = new int[7];
+
         createCreatures();
         createBonusus();
+
+        new Thread(() -> {
+            while (true) {
+                for (int i = 1; i < 7; ++i)
+                    if (curCoolTime[i] < maxCoolTime[i])
+                        ++curCoolTime[i];
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                }
+            }
+        }).start();
     }
 
     private void createCreatures() {
@@ -123,6 +140,18 @@ public class PlayScreen implements Screen {
 
         // Creatures can choose their next action now
         world.update();
+    }
+
+    private void displayCoolTime(AsciiPanel terminal) {
+        // Show characters
+        for (int i = 1; i < 7; ++i) {
+            int leftStart = 10 + 11 * (i - 1);
+            for (int j = 0; j < maxCoolTime[i]; ++j)
+                if (j < curCoolTime[i])
+                    terminal.write("*", leftStart + j, 45, Color.GREEN);
+                else
+                    terminal.write("*", leftStart + j, 45, Color.DARK_GRAY);
+        }
     }
 
     private void displaySkill(AsciiPanel terminal) {
@@ -222,10 +251,10 @@ public class PlayScreen implements Screen {
             preMessageClearTime = new Date();
         int top = this.screenHeight - messages.size();
         for (int i = 0; i < messages.size(); i++) {
-            terminal.write(messages.get(i), 1, top + i + 1);
+            terminal.write(messages.get(i), 1, top - i + 1);
         }
         this.oldMessages.addAll(messages);
-        if (new Date().getTime() - preMessageClearTime.getTime() > 1500) {
+        if (new Date().getTime() - preMessageClearTime.getTime() > 2000) {
             messages.clear();
             preMessageClearTime = null;
         }
@@ -242,6 +271,8 @@ public class PlayScreen implements Screen {
         terminal.write(stats, 1, 42);
         // Messages
         displayMessages(terminal, this.messages);
+        // Cool Times
+        displayCoolTime(terminal);
 
         if (player.onSkill())
             displaySkill(terminal);
@@ -249,11 +280,11 @@ public class PlayScreen implements Screen {
         // Show characters
         terminal.write("OldMan", 2, 44, iCurAI == 0 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
         terminal.write("PowerBro", 10, 44, iCurAI == 1 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("ViewBro", 20, 44, iCurAI == 2 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("FireBro", 29, 44, iCurAI == 3 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("WaterBro", 38, 44, iCurAI == 4 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("SteelBro", 48, 44, iCurAI == 5 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("HideBro", 58, 44, iCurAI == 6 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("ViewBro", 21, 44, iCurAI == 2 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("FireBro", 32, 44, iCurAI == 3 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("WaterBro", 43, 44, iCurAI == 4 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("SteelBro", 54, 44, iCurAI == 5 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        terminal.write("HideBro", 65, 44, iCurAI == 6 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
     }
 
     @Override
@@ -292,7 +323,11 @@ public class PlayScreen implements Screen {
             player.setColor(Player.id2Color(iCurAI));
             break;
         case KeyEvent.VK_J:
-            player.skill();
+            if (curCoolTime[iCurAI] > 3) {
+                player.skill();
+                curCoolTime[iCurAI] -= 3;
+            }
+
             break;
         }
 
