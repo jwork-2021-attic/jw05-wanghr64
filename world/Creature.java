@@ -85,12 +85,15 @@ public class Creature {
         return this.hp;
     }
 
-    public void modifyHP(int amount) {
+    public boolean modifyHP(int amount) {
         this.hp += amount;
 
         if (this.hp < 1) {
             world.remove(this);
+            return true;
         }
+
+        return false;
     }
 
     private int attackValue;
@@ -145,10 +148,13 @@ public class Creature {
         int damage = Math.max(0, this.attackValue() - other.defenseValue());
         damage = (int) (Math.random() * damage) + 1;
 
-        other.modifyHP(-damage);
+        boolean killed = other.modifyHP(-damage);
 
         this.notify("You attack the '%s' for %d damage.", other.glyph, damage);
         other.notify("The '%s' attacks you for %d damage.", glyph, damage);
+
+        if (killed)
+            this.notify("You KILLED '%s' !", other.glyph);
     }
 
     public void update() {
