@@ -140,6 +140,8 @@ public class Creature {
     }
 
     public void attack(Creature other) {
+        if (other == null)
+            return;
         int damage = Math.max(0, this.attackValue() - other.defenseValue());
         damage = (int) (Math.random() * damage) + 1;
 
