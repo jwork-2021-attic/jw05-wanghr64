@@ -86,7 +86,7 @@ public class PlayScreen implements Screen {
         Arrays.fill(validAIs, true);
 
         for (int i = 0; i < 20; ++i) {
-            Creature enemy = new Creature(this.world, (char) 15, Color.PINK, 100, 20, 5, 9);
+            Creature enemy = new Creature(this.world, (char) 15, Color.PINK, 50, 20, 5, 9);
             new Thread(new EnemyAI(enemy, world, player)).start();
             world.addAtEmptyLocation(enemy);
         }
