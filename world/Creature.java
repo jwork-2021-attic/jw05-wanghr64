@@ -126,7 +126,7 @@ public class Creature {
         world.dig(wx, wy);
     }
 
-    public void moveBy(int mx, int my) {
+    public boolean moveBy(int mx, int my) {
         Creature other = world.creature(x + mx, y + my);
         Bonus bonus = world.bonus(x + mx, y + my);
 
@@ -137,9 +137,9 @@ public class Creature {
         }
         if (other == null) {
             ai.onEnter(x + mx, y + my, world.tile(x + mx, y + my));
-        } /*
-           * else { attack(other); }
-           */
+            return true;
+        }
+        return false;
     }
 
     public void attack(Creature other) {
