@@ -33,7 +33,7 @@ public abstract class PlayerAI extends CreatureAI {
     protected boolean allSee;
 
     public PlayerAI(Creature creature, World world, List<String> messages) {
-        super(creature,world);
+        super(creature, world);
         this.messages = messages;
     }
 
@@ -53,10 +53,29 @@ public abstract class PlayerAI extends CreatureAI {
 
     public void getBonus(Bonus bonus) {
         switch (bonus.type()) {
-        case 0:// dig
-            player.digCount += 10;
-        default:
-            break;
+            case 0:// dig
+                player.digCount += 10;
+                break;
+            case 11:// 1
+                player.validAIs[1] = true;
+                break;
+            case 12:// 2
+                player.validAIs[2] = true;
+                break;
+            case 13:// 3
+                player.validAIs[3] = true;
+                break;
+            case 14:// 4
+                player.validAIs[4] = true;
+                break;
+            case 15:// 5
+                player.validAIs[5] = true;
+                break;
+            case 16:// 6
+                player.validAIs[6] = true;
+                break;
+            default:
+                break;
         }
     }
 
