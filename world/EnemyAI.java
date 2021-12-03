@@ -2,17 +2,17 @@ package world;
 
 import java.util.*;
 
-public class EnemyAI extends CreatureAI {
+public abstract class EnemyAI extends CreatureAI {
 
-    Random rd;
-    int[] dx;
-    int[] dy;
-    Player player;
-    boolean finished;
-    boolean[][] visited;
-    Deque<int[]> route;
-    int dstX;
-    int dstY;
+    protected Random rd;
+    protected Player player;
+    protected boolean[][] visited;
+    protected Point[][] prePoint;
+    protected Deque<Point> route;
+    protected static int[] dx = new int[] { 1, 0, -1, 0 };
+    protected static int[] dy = new int[] { 0, 1, 0, -1 };
+    protected int dstX;
+    protected int dstY;
 
     public EnemyAI(Creature creature, World world, Player player) {
         super(creature, world);
@@ -22,10 +22,9 @@ public class EnemyAI extends CreatureAI {
         dstY = player.y();
         route = new LinkedList<>();
         visited = new boolean[world.width()][world.height()];
-        dfsRouter(creature.x(), creature.y());
+        prePoint = new Point[world.width()][world.height()];
         rd = new Random();
-        dx = new int[] { 1, 0, -1, 0 };
-        dy = new int[] { 0, 1, 0, -1 };
+        bfsRouter();
     }
 
     @Override
@@ -36,58 +35,64 @@ public class EnemyAI extends CreatureAI {
         }
     }
 
-    @Override
-    public void run() {
-        while (true) {
-            if (!canSee(player.x(), player.y())) {
-                int rdIndex = rd.nextInt(4);
-                creature.moveBy(dx[rdIndex], dy[rdIndex]);
-            } else {
-                if (dstX != player.x() || dstY != player.y()) {
-                    dstX = player.x();
-                    dstY = player.y();
-                    for (int i = 0; i < world.width(); ++i)
-                        for (int j = 0; j < world.height(); ++j)
-                            visited[i][j] = false;
-                    dfsRouter(creature.x(), creature.y());
-                    for (int[] xy : route) {
-                        System.out.printf("(%d, %d)", xy[0], xy[1]);
-                    }
-                    System.out.println();
-                }
+    
 
-                // int[] m = route.pollFirst();
-                /*
-                 * if (m != null) creature.moveBy(m[0] - creature.x(), m[1] - creature.y());
-                 * else { System.out.println("deque is null"); }
-                 */
-
+    protected void bfsRouter() {
+        for (int i = 0; i < world.width(); ++i)
+            for (int j = 0; j < world.height(); ++j) {
+                visited[i][j] = false;
+                prePoint[i][j] = null;
             }
-            try {
-                Thread.sleep(rd.nextInt(1000));
-            } catch (Exception e) {
+        route.clear();
+        int srcX = creature.x();
+        int srcY = creature.y();
+        Deque<Point> q = new LinkedList<>();
+        visited[srcX][srcY] = true;
+        q.offerLast(new Point(srcX, srcY));
+        while (!q.isEmpty()) {
+            Point curPoint = q.pollFirst();
+            int curX = curPoint.x;
+            int curY = curPoint.y;
+            if (curX == dstX && curY == dstY)
+                break;
+            for (int i = 0; i < 4; ++i) {
+                int nxtX = curX + dx[i];
+                int nxtY = curY + dy[i];
+                if (nxtX < 0 || nxtX >= world.width() || nxtY < 0 || nxtY >= world.height())
+                    continue;
+                if (!visited[nxtX][nxtY]) {
+                    visited[nxtX][nxtY] = true;
+                    if (world.tile(nxtX, nxtY) == Tile.FLOOR) {
+                        prePoint[nxtX][nxtY] = curPoint;
+                        q.offerLast(new Point(nxtX, nxtY));
+                    }
+                }
             }
         }
+        for (Point p = prePoint[dstX][dstY]; p != null; p = prePoint[p.x][p.y]) {
+            route.addFirst(p);
+        }
+        route.pollFirst();
     }
 
-    private void dfsRouter(int x, int y) {
-        if (visited[x][y])
-            return;
-        visited[x][y] = true;
-        route.offerLast(new int[] { x, y });
-        if (x == dstX && y == dstY) {
-            finished = true;
-            return;
+    protected class Point {
+        int x;
+        int y;
+
+        public Point(int x, int y) {
+            this.x = x;
+            this.y = y;
+
         }
-        int[][] ds = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-        for (int[] d : ds) {
-            int xx = x + d[0];
-            int yy = y + d[1];
-            if (!finished && xx >= 0 && xx < world.width() && yy >= 0 && yy < world.height()
-                    && world.tile(xx, yy) == Tile.FLOOR)
-                dfsRouter(xx, yy);
+
+        @Override
+        public int hashCode() {
+            return x * 100 + y;
         }
-        if (!finished)
-            route.pollLast();
+
+        @Override
+        public boolean equals(Object p) {
+            return ((Point) p).x == this.x && ((Point) p).y == this.y;
+        }
     }
 }
