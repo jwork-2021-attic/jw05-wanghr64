@@ -36,16 +36,7 @@ public class Bonus {
     }
 
     public char glyph() {
-        switch (this.type) {
-        case 0:
-            return 'A';
-        case 1:
-            return 'B';
-        case 2:
-            return 'C';
-        default:
-            return 0;
-        }
+        return (char) ('A' + this.type);
     }
 
     public void remove() {
