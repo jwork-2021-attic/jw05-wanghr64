@@ -15,6 +15,25 @@ public class BulletEnemyAI extends EnemyAI {
             dstY = player.y();
             bfsRouter();
 
+            if (rd.nextInt(15) == 0) {
+                int dx = dstX - creature.x();
+                int dy = dstY - creature.y();
+                Bullet newBullet = null;
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    if (dx < 0)
+                        newBullet = new Bullet(world, 2, creature.x() + 1, creature.y(), '9');
+                    else
+                        newBullet = new Bullet(world, 0, creature.x() - 1, creature.y(), '9');
+                } else {
+                    if (dy < 0)
+                        newBullet = new Bullet(world, 3, creature.x(), creature.y() - 1, '9');
+                    else
+                        newBullet = new Bullet(world, 1, creature.x(), creature.y() + 1, '9');
+                }
+                world.addBullet(newBullet);
+                new Thread(newBullet).start();
+            }
+
             if (rd.nextInt(5) <= 2) {
                 Point nxtPoint = route.peekFirst();
                 if (nxtPoint != null) {
@@ -27,7 +46,7 @@ public class BulletEnemyAI extends EnemyAI {
                 creature.moveBy(dx[r], dy[r]);
             }
             try {
-                Thread.sleep(rd.nextInt(300) + 200);
+                Thread.sleep(rd.nextInt(300) + 300);
             } catch (Exception e) {
             }
         }
