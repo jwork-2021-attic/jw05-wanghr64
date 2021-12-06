@@ -33,6 +33,7 @@ public class World {
     private int width;
     private int height;
     private ConcurrentLinkedDeque<Creature> creatures;
+    private ConcurrentLinkedDeque<Bullet> bullets;
     private List<Bonus> bonuses;
 
     public static final int TILE_TYPES = 2;
@@ -43,6 +44,7 @@ public class World {
         this.height = tiles[0].length;
         this.creatures = new ConcurrentLinkedDeque<>();
         this.bonuses = new LinkedList<>();
+        this.bullets = new ConcurrentLinkedDeque<>();
     }
 
     public Tile tile(int x, int y) {
@@ -105,6 +107,10 @@ public class World {
         this.bonuses.add(bonus);
     }
 
+    public void addBullet(Bullet bullet) {
+        this.bullets.add(bullet);
+    }
+
     public void addAtLocation(Creature creature, int x, int y) {
         creature.setX(x);
         creature.setY(y);
@@ -135,12 +141,20 @@ public class World {
         return this.bonuses;
     }
 
+    public ConcurrentLinkedDeque<Bullet> getBullets() {
+        return this.bullets;
+    }
+
     public void remove(Creature target) {
         this.creatures.remove(target);
     }
 
     public void removeBonus(Bonus target) {
         this.bonuses.remove(target);
+    }
+
+    public void removeBullet(Bullet target) {
+        this.bullets.remove(target);
     }
 
     public void update() {
