@@ -106,7 +106,7 @@ public class AsciiPanel extends JPanel {
     private int heightInCharacters;
     private int charWidth = 9;
     private int charHeight = 16;
-    private String terminalFontFile = "cp437_9x16.png";
+    private String terminalFontFile = "my_16x16.png";
     private Color defaultBackgroundColor;
     private Color defaultForegroundColor;
     private int cursorX;
@@ -348,7 +348,7 @@ public class AsciiPanel extends JPanel {
         oldForegroundColors = new Color[widthInCharacters][heightInCharacters];
 
         if (font == null) {
-            font = AsciiFont.CP437_9x16;
+            font = AsciiFont.MY_16x16;
         }
         setAsciiFont(font);
     }
@@ -372,8 +372,9 @@ public class AsciiPanel extends JPanel {
                 Color bg = backgroundColors[x][y];
                 Color fg = foregroundColors[x][y];
 
-                LookupOp op = setColors(bg, fg);
-                BufferedImage img = op.filter(glyphs[chars[x][y]], null);
+                // LookupOp op = setColors(bg, fg);
+                // BufferedImage img = op.filter(glyphs[chars[x][y]], null);
+                BufferedImage img = glyphs[chars[x][y]];
                 offscreenGraphics.drawImage(img, x * charWidth, y * charHeight, null);
 
                 oldBackgroundColors[x][y] = backgroundColors[x][y];
