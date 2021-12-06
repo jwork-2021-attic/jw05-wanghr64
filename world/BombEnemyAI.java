@@ -15,6 +15,13 @@ public class BombEnemyAI extends EnemyAI {
                 dstY = player.y();
                 bfsRouter();
             }
+
+            if (Math.abs(player.x() - creature.x()) < 2 && Math.abs(player.y() - creature.y()) < 2) {
+                player.modifyHP(-10);
+                world.remove(creature);
+                break;
+            }
+
             Point nxtPoint = route.peekFirst();
             if (nxtPoint != null) {
                 boolean moved = creature.moveBy(nxtPoint.x - creature.x(), nxtPoint.y - creature.y());
@@ -22,10 +29,8 @@ public class BombEnemyAI extends EnemyAI {
                     route.pollFirst();
             }
 
-            // int r = rd.nextInt(4);
-            // creature.moveBy(dx[r], dy[r]);
             try {
-                Thread.sleep(rd.nextInt(300) + 200);
+                Thread.sleep(rd.nextInt(200) + 100);
             } catch (Exception e) {
             }
         }
