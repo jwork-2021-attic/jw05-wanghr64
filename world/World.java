@@ -133,6 +133,13 @@ public class World {
         return null;
     }
 
+    public Bullet bullet(int x, int y) {
+        for (Bullet b : this.bullets)
+            if (b.x() == x && b.y() == y)
+                return b;
+        return null;
+    }
+
     public ConcurrentLinkedDeque<Creature> getCreatures() {
         return this.creatures;
     }
@@ -154,7 +161,8 @@ public class World {
     }
 
     public void removeBullet(Bullet target) {
-        this.bullets.remove(target);
+        if (target != null)
+            this.bullets.remove(target);
     }
 
     public void update() {

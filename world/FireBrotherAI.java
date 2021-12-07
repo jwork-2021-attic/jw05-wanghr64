@@ -14,23 +14,24 @@ public class FireBrotherAI extends PlayerAI {
     @Override
     public void run() {
         onSkill = true;
+        freeze = true;
         Creature enemy = null;
         int x = player.x();
         int y = player.y();
         for (int i = 1; i < 6; ++i) {
             switch (direction) {
-            case KeyEvent.VK_RIGHT:
-                enemy = world.creature(x + i, y);
-                break;
-            case KeyEvent.VK_LEFT:
-                enemy = world.creature(x - i, y);
-                break;
-            case KeyEvent.VK_UP:
-                enemy = world.creature(x, y - i);
-                break;
-            case KeyEvent.VK_DOWN:
-                enemy = world.creature(x, y + i);
-                break;
+                case KeyEvent.VK_RIGHT:
+                    enemy = world.creature(x + i, y);
+                    break;
+                case KeyEvent.VK_LEFT:
+                    enemy = world.creature(x - i, y);
+                    break;
+                case KeyEvent.VK_UP:
+                    enemy = world.creature(x, y - i);
+                    break;
+                case KeyEvent.VK_DOWN:
+                    enemy = world.creature(x, y + i);
+                    break;
             }
             if (enemy != null)
                 player.attack(enemy);
@@ -39,6 +40,7 @@ public class FireBrotherAI extends PlayerAI {
             Thread.sleep(1000);
         } catch (Exception e) {
         }
+        freeze = false;
         onSkill = false;
     }
 

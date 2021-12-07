@@ -11,6 +11,7 @@ public class WaterBrotherAI extends PlayerAI {
     @Override
     public void run() {
         onSkill = true;
+        freeze = true;
         int r = 5;
         int x = player.x();
         int y = player.y();
@@ -19,17 +20,25 @@ public class WaterBrotherAI extends PlayerAI {
                 if (i == 0 && j == 0)
                     continue;
                 player.attack(world.creature(x + j, y + i));
-                if (i != 0)
+                world.removeBullet(world.bullet(x + j, y + i));
+                if (i != 0) {
                     player.attack(world.creature(x + j, y - i));
-                if (j != 0)
+                    world.removeBullet(world.bullet(x + j, y + i));
+                }
+                if (j != 0) {
                     player.attack(world.creature(x - j, y + i));
-                if (i != 0 && j != 0)
+                    world.removeBullet(world.bullet(x + j, y + i));
+                }
+                if (i != 0 && j != 0) {
                     player.attack(world.creature(x - j, y - i));
+                    world.removeBullet(world.bullet(x + j, y + i));
+                }
             }
         try {
             Thread.sleep(1000);
         } catch (Exception e) {
         }
+        freeze = false;
         onSkill = false;
     }
 }

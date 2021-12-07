@@ -26,9 +26,9 @@ import java.awt.Color;
  */
 public enum Tile {
 
-    FLOOR((char) 250, AsciiPanel.green),
+    FLOOR((char) 255, AsciiPanel.fromPic),
 
-    WALL((char) 177, AsciiPanel.brightBlack),
+    WALL((char) 140, AsciiPanel.fromPic),
 
     BOUNDS('x', AsciiPanel.magenta);
 

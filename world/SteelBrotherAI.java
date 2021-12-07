@@ -10,6 +10,16 @@ public class SteelBrotherAI extends PlayerAI {
 
     @Override
     public void run() {
-
+        onSkill = true;
+        int defence = player.defenseValue();
+        player.setGlyph((char) 151);
+        player.setDefense(Integer.MAX_VALUE);
+        try {
+            Thread.sleep(5000);
+        } catch (Exception e) {
+        }
+        player.setDefense(defence);
+        player.setGlyph((char) 148);
+        onSkill = false;
     }
 }

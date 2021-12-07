@@ -26,14 +26,6 @@ import asciiPanel.AsciiPanel;
 public class WinScreen extends RestartScreen {
     @Override
     public void displayOutput(AsciiPanel terminal) {
-        terminal.write("                                                              dP ", 8, 3);
-        terminal.write("                                                              88 ", 8, 4);
-        terminal.write("dP    dP .d8888b. dP    dP    dP  dP  dP .d8888b. 88d888b.    88 ", 8, 5);
-        terminal.write("88    88 88'  `88 88    88    88  88  88 88'  `88 88'  `88    dP ", 8, 6);
-        terminal.write("88.  .88 88.  .88 88.  .88    88.88b.88' 88.  .88 88    88       ", 8, 7);
-        terminal.write("`8888P88 `88888P' `88888P'    8888P Y8P  `88888P' dP    dP    oo ", 8, 8);
-        terminal.write("     .88                                                         ", 8, 9);
-        terminal.write(" d8888P                                                          ", 8, 10);
-        terminal.write("Press Enter to restart...", 0, 15);
+        terminal.write("You win!", 15, 7);
     }
 }

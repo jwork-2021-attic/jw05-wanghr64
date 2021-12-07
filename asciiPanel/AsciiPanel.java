@@ -100,6 +100,8 @@ public class AsciiPanel extends JPanel {
      */
     public static Color brightWhite = new Color(255, 255, 255);
 
+    public static Color fromPic = new Color(254, 254, 254);
+
     private Image offscreenBuffer;
     private Graphics offscreenGraphics;
     private int widthInCharacters;
@@ -372,10 +374,14 @@ public class AsciiPanel extends JPanel {
                 Color bg = backgroundColors[x][y];
                 Color fg = foregroundColors[x][y];
 
-                // LookupOp op = setColors(bg, fg);
-                // BufferedImage img = op.filter(glyphs[chars[x][y]], null);
-                BufferedImage img = glyphs[chars[x][y]];
-                offscreenGraphics.drawImage(img, x * charWidth, y * charHeight, null);
+                if (bg.equals(fromPic) || fg.equals(fromPic)) {
+                    BufferedImage img = glyphs[chars[x][y]];
+                    offscreenGraphics.drawImage(img, x * charWidth, y * charHeight, null);
+                } else {
+                    LookupOp op = setColors(bg, fg);
+                    BufferedImage img = op.filter(glyphs[chars[x][y]], null);
+                    offscreenGraphics.drawImage(img, x * charWidth, y * charHeight, null);
+                }
 
                 oldBackgroundColors[x][y] = backgroundColors[x][y];
                 oldForegroundColors[x][y] = foregroundColors[x][y];

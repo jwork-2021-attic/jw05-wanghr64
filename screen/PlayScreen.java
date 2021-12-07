@@ -22,6 +22,7 @@ import asciiPanel.AsciiPanel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.*;
+import audio.*;
 
 /**
  *
@@ -36,21 +37,17 @@ public class PlayScreen implements Screen {
     private List<String> messages;
     private List<String> oldMessages;
     private PlayerAI[] myAIs;
-    private int[] curCoolTime;
-    private final int[] maxCoolTime;
+
     private int iCurAI;
     private int preDirect;
     private Date preMessageClearTime;
 
     public PlayScreen() {
-        this.screenWidth = 80;
-        this.screenHeight = 40;
+        this.screenWidth = 38;
+        this.screenHeight = 15;
         createWorld();
         this.messages = new ArrayList<String>();
         this.oldMessages = new ArrayList<String>();
-
-        maxCoolTime = new int[] { 0, 10, 10, 10, 10, 10, 10 };
-        curCoolTime = new int[7];
 
         createCreatures();
         createBonusus();
@@ -58,10 +55,37 @@ public class PlayScreen implements Screen {
         new Thread(() -> {
             while (true) {
                 for (int i = 1; i < 7; ++i)
-                    if (curCoolTime[i] < maxCoolTime[i])
-                        ++curCoolTime[i];
+                    if (player.curCoolTime[i] < player.maxCoolTime[i])
+                        ++player.curCoolTime[i];
                 try {
                     Thread.sleep(1000);
+                } catch (Exception e) {
+                }
+            }
+        }).start();
+
+        new Thread(() -> {
+            while (true) {
+                Random rd = new Random();
+                if (rd.nextInt(2) == 0) {
+                    Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 15, 20, 5, 9);
+                    new Thread(new BulletEnemyAI(enemy, world, player)).start();
+                    world.addAtEmptyLocation(enemy);
+                } else {
+                    Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 1, 20, 5, 9);
+                    new Thread(new BombEnemyAI(enemy, world, player)).start();
+                    world.addAtEmptyLocation(enemy);
+                }
+                world.addBonusAtEmptyLocation(new world.Bonus(world, rd.nextInt(3)));
+                boolean finished = true;
+                for (int i = 0; i < 7; ++i)
+                    if (player.validAIs[i] == false)
+                        finished = false;
+                if (finished) {
+                    world.addBonusAtEmptyLocation(new world.Bonus(world, 999));
+                }
+                try {
+                    Thread.sleep(3000);
                 } catch (Exception e) {
                 }
             }
@@ -69,7 +93,7 @@ public class PlayScreen implements Screen {
     }
 
     private void createCreatures() {
-        player = new Player(this.world, (char) 2, AsciiPanel.brightWhite, 100, 20, 5, 9);
+        player = new Player(this.world, (char) 138, AsciiPanel.fromPic, 100, 20, 10, 9);
         world.addAtEmptyLocation(player);
         myAIs = new PlayerAI[7];
         myAIs[0] = new OldManAI(player, world, messages);
@@ -82,9 +106,14 @@ public class PlayScreen implements Screen {
         iCurAI = 0;
         player.setAI(myAIs[iCurAI]);
 
-        for (int i = 0; i < 20; ++i) {
-            Creature enemy = new Creature(this.world, (char) 15, Color.PINK, 50, 20, 5, 9);
+        for (int i = 0; i < 10; ++i) {
+            Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 15, 20, 5, 9);
             new Thread(new BulletEnemyAI(enemy, world, player)).start();
+            world.addAtEmptyLocation(enemy);
+        }
+        for (int i = 0; i < 10; ++i) {
+            Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 1, 20, 5, 9);
+            new Thread(new BombEnemyAI(enemy, world, player)).start();
             world.addAtEmptyLocation(enemy);
         }
     }
@@ -114,7 +143,7 @@ public class PlayScreen implements Screen {
                 if (player.canSee(wx, wy)) {
                     terminal.write(world.glyph(wx, wy), x, y, world.color(wx, wy));
                 } else {
-                    terminal.write(world.glyph(wx, wy), x, y, Color.DARK_GRAY);
+                    terminal.write((char) 0, x, y, AsciiPanel.fromPic);
                 }
             }
         }
@@ -123,7 +152,7 @@ public class PlayScreen implements Screen {
             if (creature.x() >= left && creature.x() < left + screenWidth && creature.y() >= top
                     && creature.y() < top + screenHeight) {
                 if (player.canSee(creature.x(), creature.y())) {
-                    terminal.write(creature.glyph(), creature.x() - left, creature.y() - top, creature.color());
+                    terminal.write(creature.glyph(), creature.x() - left, creature.y() - top, AsciiPanel.fromPic);
                 }
             }
         }
@@ -133,10 +162,17 @@ public class PlayScreen implements Screen {
             if (bonus.x() >= left && bonus.x() < left + screenWidth && bonus.y() >= top
                     && bonus.y() < top + screenHeight) {
                 if (player.canSee(bonus.x(), bonus.y())) {
-                    if (bonus.type() >= 11 && bonus.type() <= 16)
-                        terminal.write(bonus.glyph(), bonus.x() - left, bonus.y() - top, Color.CYAN);
-                    else
-                        terminal.write(bonus.glyph(), bonus.x() - left, bonus.y() - top, Color.BLUE);
+                    terminal.write(bonus.glyph(), bonus.x() - left, bonus.y() - top, AsciiPanel.fromPic);
+                }
+            }
+        }
+
+        // Show bullets
+        for (Bullet bullet : world.getBullets()) {
+            if (bullet.x() >= left && bullet.x() < left + screenWidth && bullet.y() >= top
+                    && bullet.y() < top + screenHeight) {
+                if (player.canSee(bullet.x(), bullet.y())) {
+                    terminal.write(bullet.glyph(), bullet.x() - left, bullet.y() - top, AsciiPanel.fromPic);
                 }
             }
         }
@@ -148,12 +184,13 @@ public class PlayScreen implements Screen {
     private void displayCoolTime(AsciiPanel terminal) {
         // Show characters
         for (int i = 1; i < 7; ++i) {
-            int leftStart = 10 + 11 * (i - 1);
-            for (int j = 0; j < maxCoolTime[i]; ++j)
-                if (j < curCoolTime[i])
-                    terminal.write("*", leftStart + j, 45, Color.GREEN);
-                else
-                    terminal.write("*", leftStart + j, 45, Color.DARK_GRAY);
+            if (!player.validAIs[i])
+                continue;
+            int leftStart = 5 + 11 * ((i - 1) % 3);
+            int height = 18 + (i - 1) / 3;
+            for (int j = 0; j < player.curCoolTime[i] / 2; ++j) {
+                terminal.write('*', leftStart + j, height, AsciiPanel.brightGreen);
+            }
         }
     }
 
@@ -182,22 +219,26 @@ public class PlayScreen implements Screen {
                     case KeyEvent.VK_LEFT:
                         for (int i = 1; i < 6 && player.x() - getScrollX() - i >= 0
                                 && world.tile(player.x() - i, player.y()) != Tile.WALL; ++i)
-                            terminal.write("*", player.x() - getScrollX() - i, player.y() - getScrollY(), Color.RED);
+                            terminal.write((char) 161, player.x() - getScrollX() - i, player.y() - getScrollY(),
+                                    AsciiPanel.fromPic);
                         break;
                     case KeyEvent.VK_RIGHT:
                         for (int i = 1; i < 6 && player.x() - getScrollX() + i < screenWidth
                                 && world.tile(player.x() + i, player.y()) != Tile.WALL; ++i)
-                            terminal.write("*", player.x() - getScrollX() + i, player.y() - getScrollY(), Color.RED);
+                            terminal.write((char) 163, player.x() - getScrollX() + i, player.y() - getScrollY(),
+                                    AsciiPanel.fromPic);
                         break;
                     case KeyEvent.VK_UP:
                         for (int i = 1; i < 6 && player.y() - getScrollY() - i >= 0
                                 && world.tile(player.x(), player.y() - i) != Tile.WALL; ++i)
-                            terminal.write("*", player.x() - getScrollX(), player.y() - getScrollY() - i, Color.RED);
+                            terminal.write((char) 162, player.x() - getScrollX(), player.y() - getScrollY() - i,
+                                    AsciiPanel.fromPic);
                         break;
                     case KeyEvent.VK_DOWN:
                         for (int i = 1; i < 6 && player.y() - getScrollY() + i < screenHeight
                                 && world.tile(player.x(), player.y() + i) != Tile.WALL; ++i)
-                            terminal.write("*", player.x() - getScrollX(), player.y() - getScrollY() + i, Color.RED);
+                            terminal.write((char) 160, player.x() - getScrollX(), player.y() - getScrollY() + i,
+                                    AsciiPanel.fromPic);
                         break;
                 }
                 break;
@@ -215,25 +256,25 @@ public class PlayScreen implements Screen {
                         try {
                             if (xx + j < screenWidth && xx + j >= 0 && yy + i < screenHeight && yy + i >= 0
                                     && world.tile(wxx + j, wyy + i) != Tile.WALL)
-                                terminal.write('*', xx + j, yy + i, Color.BLUE);
+                                terminal.write((char) 164, xx + j, yy + i, AsciiPanel.fromPic);
                         } catch (Exception e) {
                         }
                         try {
                             if (xx + j < screenWidth && xx + j >= 0 && yy - i < screenHeight && yy - i >= 0
                                     && world.tile(wxx + j, wyy - i) != Tile.WALL)
-                                terminal.write('*', xx + j, yy - i, Color.BLUE);
+                                terminal.write((char) 164, xx + j, yy - i, AsciiPanel.fromPic);
                         } catch (Exception e) {
                         }
                         try {
                             if (xx - j < screenWidth && xx - j >= 0 && yy + i < screenHeight && yy + i >= 0
                                     && world.tile(wxx - j, wyy + i) != Tile.WALL)
-                                terminal.write('*', xx - j, yy + i, Color.BLUE);
+                                terminal.write((char) 164, xx - j, yy + i, AsciiPanel.fromPic);
                         } catch (Exception e) {
                         }
                         try {
                             if (xx - j < screenWidth && xx - j >= 0 && yy - i < screenHeight && yy - i >= 0
                                     && world.tile(wxx - j, wyy - i) != Tile.WALL)
-                                terminal.write('*', xx - j, yy - i, Color.BLUE);
+                                terminal.write((char) 164, xx - j, yy - i, AsciiPanel.fromPic);
                         } catch (Exception e) {
                         }
 
@@ -270,30 +311,60 @@ public class PlayScreen implements Screen {
         // Player
         terminal.write(player.glyph(), player.x() - getScrollX(), player.y() - getScrollY(), player.color());
         // Stats
-        String stats = String.format("%3d/%3d hp   %2d digs", player.hp(), player.maxHP(), player.digCount);
-        terminal.write(stats, 1, 42);
+        String stats = String.format("%3d/%3d hp %2d digs", player.hp(),
+                player.maxHP(), player.digCount);
+        terminal.write(stats, 1, 16);
         // Messages
-        displayMessages(terminal, this.messages);
+        // displayMessages(terminal, this.messages);
         // Cool Times
         displayCoolTime(terminal);
 
         if (player.onSkill())
             displaySkill(terminal);
 
-        // Show characters
-        terminal.write("OldMan", 2, 44, iCurAI == 0 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("PowerBro", 10, 44, iCurAI == 1 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("ViewBro", 21, 44, iCurAI == 2 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("FireBro", 32, 44, iCurAI == 3 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("WaterBro", 43, 44, iCurAI == 4 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("SteelBro", 54, 44, iCurAI == 5 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
-        terminal.write("HideBro", 65, 44, iCurAI == 6 ? Player.id2Color(iCurAI) : Color.DARK_GRAY);
+        if (player.validAIs[1])
+            terminal.write((char) 144, 4, 18, AsciiPanel.fromPic);
+        if (player.validAIs[2])
+            terminal.write((char) 145, 15, 18, AsciiPanel.fromPic);
+        if (player.validAIs[3])
+            terminal.write((char) 146, 26, 18, AsciiPanel.fromPic);
+        if (player.validAIs[4])
+            terminal.write((char) 147, 4, 19, AsciiPanel.fromPic);
+        if (player.validAIs[5])
+            terminal.write((char) 148, 15, 19, AsciiPanel.fromPic);
+        if (player.validAIs[6])
+            terminal.write((char) 149, 26, 19, AsciiPanel.fromPic);
+
+        switch (iCurAI) {
+            case 1:
+                terminal.write('*', 3, 18, AsciiPanel.red);
+                break;
+            case 2:
+                terminal.write('*', 14, 18, AsciiPanel.red);
+                break;
+            case 3:
+                terminal.write('*', 25, 18, AsciiPanel.red);
+                break;
+            case 4:
+                terminal.write('*', 3, 19, AsciiPanel.red);
+                break;
+            case 5:
+                terminal.write('*', 14, 19, AsciiPanel.red);
+                break;
+            case 6:
+                terminal.write('*', 25, 19, AsciiPanel.red);
+                break;
+        }
     }
 
     @Override
     public Screen respondToUserInput(KeyEvent key) {
-        if (player.onSkill())
+        if (player.freeze())
             return this;
+        if (player.win)
+            return new WinScreen();
+        if (player.hp() <= 0)
+            return new LoseScreen();
         switch (key.getKeyCode()) {
             case KeyEvent.VK_A:
                 player.moveBy(-1, 0);
@@ -312,23 +383,35 @@ public class PlayScreen implements Screen {
                 preDirect = KeyEvent.VK_DOWN;
                 break;
             case KeyEvent.VK_Q:
-                iCurAI = iCurAI == 0 ? 6 : iCurAI - 1;
-                while (!player.validAIs[iCurAI])
+                if (!player.onSkill()) {
                     iCurAI = iCurAI == 0 ? 6 : iCurAI - 1;
-                player.setAI(myAIs[iCurAI]);
-                player.setColor(Player.id2Color(iCurAI));
+                    while (!player.validAIs[iCurAI])
+                        iCurAI = iCurAI == 0 ? 6 : iCurAI - 1;
+                    player.setAI(myAIs[iCurAI]);
+                    if (iCurAI != 0)
+                        player.setGlyph((char) (144 + iCurAI - 1));
+                    else
+                        player.setGlyph((char) 138);
+                }
+                // player.setColor(AsciiPanel.fromPic);
                 break;
             case KeyEvent.VK_E:
-                iCurAI = (iCurAI + 1) % 7;
-                while (!player.validAIs[iCurAI])
+                if (!player.onSkill()) {
                     iCurAI = (iCurAI + 1) % 7;
-                player.setAI(myAIs[iCurAI]);
-                player.setColor(Player.id2Color(iCurAI));
+                    while (!player.validAIs[iCurAI])
+                        iCurAI = (iCurAI + 1) % 7;
+                    player.setAI(myAIs[iCurAI]);
+                    if (iCurAI != 0)
+                        player.setGlyph((char) (144 + iCurAI - 1));
+                    else
+                        player.setGlyph((char) 138);
+                }
+                // player.setColor(Player.id2Color(iCurAI));}
                 break;
             case KeyEvent.VK_J:
-                if (curCoolTime[iCurAI] > 3) {
+                if (player.curCoolTime[iCurAI] >= player.costCoolTime[iCurAI]) {
                     player.skill();
-                    curCoolTime[iCurAI] -= 3;
+                    player.curCoolTime[iCurAI] -= player.costCoolTime[iCurAI];
                 }
 
                 break;

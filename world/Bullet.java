@@ -2,13 +2,32 @@ package world;
 
 public class Bullet implements Runnable {
 
-    Bullet(World world, int direction, int x, int y, char glyph) {
-        this.glyph = glyph;
+    Bullet(World world, int direction, int x, int y) {
         this.world = world;
         this.direction = direction;
+        switch (this.direction) {
+            case 0:
+                this.glyph = (char) 137;
+                break;
+            case 1:
+                this.glyph = (char) 134;
+                break;
+            case 2:
+                this.glyph = (char) 135;
+                break;
+            case 3:
+                this.glyph = (char) 136;
+                break;
+        }
         this.x = x;
         this.y = y;
+        this.oriX = x;
+        this.oriY = y;
+        this.attackValue = 20;
     }
+
+    private int oriX;
+    private int oriY;
 
     private World world;
 
@@ -55,7 +74,6 @@ public class Bullet implements Runnable {
 
         if (other != null && Player.class.isAssignableFrom(other.getClass())) {
             int damage = Math.max(0, this.attackValue() - other.defenseValue());
-            damage = (int) (Math.random() * damage) + 1;
             other.modifyHP(-damage);
             world.removeBullet(this);
             return false;
@@ -81,6 +99,12 @@ public class Bullet implements Runnable {
     public void run() {
         while (true) {
             if (!this.moveBy(dx[direction], dy[direction]))
+                break;
+            if (Math.abs(oriX - x) >= 6 || Math.abs(oriY - y) >= 6) {
+                world.removeBullet(this);
+                break;
+            }
+            if (world.bullet(x, y) == null)
                 break;
             try {
                 Thread.sleep(200);

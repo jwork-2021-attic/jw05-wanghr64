@@ -27,7 +27,7 @@ public class LoseScreen extends RestartScreen {
 
     @Override
     public void displayOutput(AsciiPanel terminal) {
-        terminal.write("You lost! Press enter to try again.", 0, 0);
+        terminal.write("You lose!", 15, 7);
     }
 
 }

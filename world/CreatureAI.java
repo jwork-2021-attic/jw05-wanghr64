@@ -35,9 +35,14 @@ abstract class CreatureAI implements Runnable {
     }
 
     protected boolean onSkill;
+    protected boolean freeze;
 
     public boolean onSkill() {
         return this.onSkill;
+    }
+
+    public boolean freeze() {
+        return this.freeze;
     }
 
     public void onEnter(int x, int y, Tile tile) {

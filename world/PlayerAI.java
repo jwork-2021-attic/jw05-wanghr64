@@ -18,7 +18,7 @@
 package world;
 
 import java.awt.Point;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -56,6 +56,14 @@ public abstract class PlayerAI extends CreatureAI {
             case 0:// dig
                 player.digCount += 10;
                 break;
+            case 1:// hp
+                int diffHP = Math.min(10, 100 - player.hp());
+                player.modifyHP(diffHP);
+                break;
+            case 2:// ct
+                for (int i = 1; i < 7; ++i)
+                    player.curCoolTime[i] = 10;
+                break;
             case 11:// 1
                 player.validAIs[1] = true;
                 break;
@@ -73,6 +81,9 @@ public abstract class PlayerAI extends CreatureAI {
                 break;
             case 16:// 6
                 player.validAIs[6] = true;
+                break;
+            case 999:
+                player.win = true;
                 break;
             default:
                 break;

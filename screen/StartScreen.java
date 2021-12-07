@@ -34,7 +34,7 @@ public class StartScreen extends RestartScreen {
     private int selected = 0;
 
     private List<String> lines = new ArrayList<>();
-    private int upBound = 15;
+    private int upBound = 3;
 
     private HelpScreen hs = new HelpScreen(this);
 
@@ -54,8 +54,8 @@ public class StartScreen extends RestartScreen {
     public void displayOutput(AsciiPanel terminal) {
         try {
             for (int i = 0; i < lines.size(); ++i)
-                terminal.write(lines.get(i), 2, upBound + i);
-            terminal.write((char) 26, 32, 24 + selected, Color.MAGENTA);
+                terminal.write(lines.get(i), 2, upBound + i, AsciiPanel.white, AsciiPanel.black);
+            terminal.write((char) 33, 11, 12 + selected, Color.MAGENTA);
         } catch (Exception e) {
             terminal.write("File not found.", 2, 10);
         }
@@ -65,23 +65,23 @@ public class StartScreen extends RestartScreen {
     @Override
     public Screen respondToUserInput(KeyEvent key) {
         switch (key.getKeyCode()) {
-        case KeyEvent.VK_ENTER:
-            switch (this.selected) {
-            case 0:
-                return new PlayScreen();
-            case 1:
-                return new LoadScreen(this);
-            case 2:
-                return hs;
-            }
-        case KeyEvent.VK_DOWN:
-            selected = (selected + 1) % 3;
-            return this;
-        case KeyEvent.VK_UP:
-            selected = (selected - 1) % 3;
-            return this;
-        default:
-            return this;
+            case KeyEvent.VK_ENTER:
+                switch (this.selected) {
+                    case 0:
+                        return new PlayScreen();
+                    case 1:
+                        return new LoadScreen(this);
+                    case 2:
+                        return hs;
+                }
+            case KeyEvent.VK_DOWN:
+                selected = (selected + 1) % 3;
+                return this;
+            case KeyEvent.VK_UP:
+                selected = (selected - 1) % 3;
+                return this;
+            default:
+                return this;
         }
     }
 

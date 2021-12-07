@@ -9,14 +9,33 @@ public class Player extends Creature {
         this.validAIs = new boolean[7];
         Arrays.fill(this.validAIs, false);
         this.validAIs[0] = true;
+        maxCoolTime = new int[] { 0, 10, 10, 10, 10, 10, 10 };
+        costCoolTime = new int[] { 0, 1, 10, 3, 7, 10, 10 };
+        curCoolTime = new int[7];
     }
 
     public int digCount = 0;
 
+    public boolean win = false;
+
+    public boolean isVisible = true;
+
     public boolean[] validAIs;
+
+    public int[] curCoolTime;
+    public final int[] maxCoolTime;
+    public final int[] costCoolTime;
 
     public boolean onSkill() {
         return ai.onSkill();
+    }
+
+    public boolean freeze() {
+        return ai.freeze();
+    }
+
+    public void setDefense(int d) {
+        this.defenseValue = d;
     }
 
     public static Color id2Color(int id) {

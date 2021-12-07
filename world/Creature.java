@@ -102,7 +102,7 @@ public class Creature {
         return this.attackValue;
     }
 
-    private int defenseValue;
+    protected int defenseValue;
 
     public int defenseValue() {
         return this.defenseValue;
@@ -126,7 +126,17 @@ public class Creature {
         world.dig(wx, wy);
     }
 
+    public int direction = 0;// 0:left 1:right 2:up 3:down
+
     public boolean moveBy(int mx, int my) {
+        if (mx < 0)
+            direction = 0;
+        else if (mx > 0)
+            direction = 1;
+        else if (my < 0)
+            direction = 2;
+        else
+            direction = 3;
         Creature other = world.creature(x + mx, y + my);
         Bonus bonus = world.bonus(x + mx, y + my);
 
@@ -146,7 +156,6 @@ public class Creature {
         if (other == null)
             return;
         int damage = Math.max(0, this.attackValue() - other.defenseValue());
-        damage = (int) (Math.random() * damage) + 1;
 
         boolean killed = other.modifyHP(-damage);
 
